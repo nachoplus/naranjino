@@ -1,4 +1,5 @@
-/* trackuino copyright (C) 2010  EA5HAV Javi
+/* naranjino copyright (C) 2012  Nacho mas
+ * based on trackuino. copyright (C) 2010  EA5HAV Javi
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -70,6 +71,8 @@ void aprs_send(char* msg)
   ax25_send_string(itoa(sensors_int_bat(), temp, 10));
   ax25_send_string("/Ve=");
   ax25_send_string(itoa(sensors_ext_bat(), temp, 10));
+  ax25_send_string("/DOP=");
+  ax25_send_string(itoa((int)(gps_dop*10), temp, 10));  //Dilution of Precision x 10. Values near 10 or lower are the best.
   ax25_send_byte(' ');
   ax25_send_string(APRS_COMMENT);     // Comment
   ax25_send_byte(' ');
@@ -93,7 +96,9 @@ void aprs_send_telemetry(char* msg) {
     {DIGI_PATH2, DIGI_PATH2_TTL}, // Digi2 (second digi in the chain)
 #endif
   };
-
+  //Do not send if time is longer than APRS_SLOW_CYCLE_START from boot
+  if (millis()/1000 >= APRS_SLOW_CYCLE_START)
+      return;
   ax25_send_header(addresses, sizeof(addresses)/sizeof(s_address));
   ax25_send_string("T#");
   sequence_n++;

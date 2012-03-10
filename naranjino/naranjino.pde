@@ -1,7 +1,8 @@
 
 #include <icrmacros.h>
 
-/* trackuino copyright (C) 2010  EA5HAV Javi
+/* naranjino copyright (C) 2012  Nacho mas
+ * based on trackuino. copyright (C) 2010  EA5HAV Javi
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,10 +46,9 @@
 #include <avr/sleep.h>
 #include <EEPROM.h>
 
-//GPS connected to serial soft. Only alternative if signal is inverted
+//GPS connected to serial soft. Only alternative if serial signal is inverted
 #ifdef GPS_PORT_SOFTSERIAL_RX_PORT
 #include <NewSoftSerial.h>
-//#include <SoftwareSerial.h>
 NewSoftSerial gpsSerial =  NewSoftSerial(GPS_PORT_SOFTSERIAL_RX_PORT, GPS_PORT_SOFTSERIAL_TX_PORT,GPS_PORT_SOFTSERIAL_INVERTED);
 #endif
 
@@ -194,7 +194,7 @@ void setup()
 #ifdef GPS_ON_PIN
   pinMode(GPS_ON_PIN, OUTPUT);
 #endif
-//Buzzer test
+//Buzzer test. Reset sound
           buzzer_on();
           buzzer_power(1000);
           buzzer_time(0.02,.2);
@@ -224,10 +224,10 @@ void loop()
     if((timeouts=get_gps_fix())==0) {
           buzzer_power(500);
           buzzer_time(0.05,1.);
-          aprs_send("GOOD");
+          aprs_send("OK");
 #ifdef SEND_TELEMETRY
           delay(5000);
-          aprs_send_telemetry("GOOD");
+          aprs_send_telemetry("OK");
 #endif               
     } else {
           snprintf(&temp[5], 4, "%03u", (int) timeouts);
@@ -240,8 +240,16 @@ void loop()
 #endif          
                        
     }  
-    buzzer_on();  //Switch on only if GPS is off   
-    next_tx_millis = millis() + APRS_PERIOD;
+      if (gps_altitude > BUZZER_ALTITUDE) {
+          buzzer_off();   // In space, no one can hear you buzz
+      } else {
+          buzzer_on();
+      }
+      // Schedule the next transmission
+      if (millis()/1000 < APRS_SLOW_CYCLE_START)
+          next_tx_millis = millis() + APRS_PERIOD;
+      else
+          next_tx_millis = millis() + APRS_SLOW_PERIOD;
   } else {
     power_save();
   }

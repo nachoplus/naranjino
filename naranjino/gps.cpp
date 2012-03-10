@@ -1,4 +1,5 @@
-/* trackuino copyright (C) 2010  EA5HAV Javi
+/* naranjino copyright (C) 2012  Nacho mas
+ * based on trackuino. copyright (C) 2010  EA5HAV Javi
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,6 +33,7 @@ static void parse_lon_hemi(const char *token);
 static void parse_speed(const char *token);
 static void parse_course(const char *token);
 static void parse_altitude(const char *token);
+static void parse_dop(const char *token);
 
 // Module types
 typedef void (*t_nmea_parser)(const char *token);
@@ -57,7 +59,7 @@ static const t_nmea_parser gga_parsers[] = {
   NULL,             // E/W
   NULL,             // Fix quality 
   NULL,             // Number of satellites
-  NULL,             // Horizontal dilution of position
+  parse_dop,        // Horizontal dilution of position
   parse_altitude,   // Altitude
   NULL,             // "M" (mean sea level)
   NULL,             // Height of GEOID (MSL) above WGS84 ellipsoid
@@ -103,6 +105,7 @@ static char new_aprs_lon[10];
 static float new_course;
 static float new_speed;
 static float new_altitude;
+static float new_dop;
 
 // Public (extern) variables, readable from other modules
 char gps_time[7];       // HHMMSS
@@ -113,6 +116,7 @@ char gps_aprs_lon[10];
 float gps_course = 0;
 float gps_speed = 0;
 float gps_altitude = 0;
+float gps_dop = 0;
 
 // Module functions
 unsigned char from_hex(char a) 
@@ -215,6 +219,10 @@ void parse_altitude(const char *token)
   new_altitude = atof(token);
 }
 
+void parse_dop(const char *token)
+{
+  new_dop = atof(token);
+}
 
 //
 // Exported functions
@@ -279,6 +287,7 @@ bool gps_decode(char c)
           gps_course = new_course;
           gps_speed = new_speed;
           gps_altitude = new_altitude;
+          gps_dop = new_dop;
           ret = true;
 #ifdef DEBUG_GPS
           Serial.println("DECODE OK!!!!!!");

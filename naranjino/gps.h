@@ -1,4 +1,5 @@
-/* trackuino copyright (C) 2010  EA5HAV Javi
+/* naranjino copyright (C) 2012  Nacho mas
+ * based on trackuino. copyright (C) 2010  EA5HAV Javi
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,6 +28,7 @@ extern char gps_aprs_lon[10];
 extern float gps_course;
 extern float gps_speed;
 extern float gps_altitude;
+extern float gps_dop;
 
 void gps_setup();
 bool gps_decode(char c);

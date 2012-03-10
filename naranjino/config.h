@@ -1,4 +1,5 @@
-/* trackuino copyright (C) 2010  EA5HAV Javi
+/* naranjino copyright (C) 2012  Nacho mas
+ * based on trackuino. copyright (C) 2010  EA5HAV Javi
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -56,7 +57,7 @@
 // APRS comment: this goes in the comment portion of the APRS message. You
 // might want to keep this short. The longer the packet, the more vulnerable
 // it is to noise. 
-#define APRS_COMMENT    "NARANJO-2012-FJN"
+#define APRS_COMMENT    "NARANJO-FJN"
 
 //UNCOMMNET if you want extra aprs msg using telemetry format.
 #define SEND_TELEMETRY
@@ -88,8 +89,12 @@
 // Low-power transmissions on occasional events (such as a balloon launch)
 // might be okay at lower-than-standard APRS periods (< 10m). Check with/ask
 // permision to local digipeaters beforehand.
-#define APRS_PERIOD   61000UL
-
+#define APRS_PERIOD   61000UL           //1 minute
+//Aditional power reduce for long lasting rescue. Slow aprs period after 
+//APRS_REDUCE_CYCLE_START  seconds from boot and do not send telemetry
+//You must set the reduce period
+#define APRS_SLOW_CYCLE_START 18000   //5 hours
+#define APRS_SLOW_PERIOD   301000UL   //5 minutes
 // Set any value here (in ms) if you want to delay the first transmission
 // after resetting the device.
 #define APRS_DELAY    0UL
@@ -229,6 +234,7 @@
 #define BUZZER_FREQ            2048     // Hz
 
 // These are the number of seconds the buzzer will stay on/off alternately
+// Initial values. Could be changed calling buzzer_time( ontime,float offtime)
 #define BUZZER_ON_TIME          0.01       // secs
 #define BUZZER_OFF_TIME         1.       // secs
 
