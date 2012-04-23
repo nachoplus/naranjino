@@ -40,7 +40,7 @@
 // - Cars:       9
 // - Home:       0
 // - IGate:      5
-#define S_CALLSIGN      "ALMAAK"
+#define S_CALLSIGN      "EA1HXB"
 #define S_CALLSIGN_ID   11
 
 // Destination callsign: APRS (with SSID=0) is usually okay.
@@ -57,16 +57,20 @@
 // APRS comment: this goes in the comment portion of the APRS message. You
 // might want to keep this short. The longer the packet, the more vulnerable
 // it is to noise. 
-#define APRS_COMMENT    "NARANJO-FJN"
+#define APRS_COMMENT    "NARANJO"
 
 //UNCOMMNET if you want extra aprs msg using telemetry format.
 #define SEND_TELEMETRY
 //TELEMETRY MESSAGE DEFINITION
 #ifdef SEND_TELEMETRY
-#define TELEMETRY_PARM "PARM.Temp,Bat,Bat2,Alt,Vel,UP,DOWN,STP,FIX,B1,B2,bit7,bit8"
-#define TELEMETRY_UNIT "UNIT.Celsiu,Volts,Volts,meters,km/h,up,down,on,fix,ok,ok,on,on"
-#define TELEMETRY_EQNS "EQNS.0,1,-273,0,0.1,0,0,0.1,0,0,50,0,0,1,0"
-#define TELEMETRY_BIT  "BIT.1,1,1,1,0,0,1,1,NARANJO-2012 BALLOON"
+
+//TELEMETRY PARMS DEFINE NOW IN aprs.cpp !!!
+
+//#define TELEMETRY_PARM "PARM.Temp,Bat,Bat2,Alt,Vel,UP,DOWN,STP,FIX,B1,B2,bit7,bit8"
+//#define TELEMETRY_UNIT "UNIT.Celsiu,Volts,Volts,meters,km/h,up,down,on,fix,ok,ok,on,on"
+//#define TELEMETRY_EQNS "EQNS.0,1,-273,0,0.1,0,0,0.1,0,0,50,0,0,1,0"
+//#define TELEMETRY_BIT  "BIT.1,1,1,1,0,0,1,1,NARANJO-2012 BALLOON"
+
 #define TELEMETRY_DEFINITION_DELAY 5000   //TIME BETWEEN DEFINITION MSG
 #endif
 
@@ -221,6 +225,16 @@
 #define INTERNAL_BATTERY_VOUT_PIN   2
 #define EXTERNAL_BATTERY_VOUT_PIN   1
 
+//UV Sensor pins
+#define UV_CATHODE  17   // Analog pin A3 used as digital 
+#define UV_ANODE  5      
+#define UV_SENSOR_N_SAMPLES 50  //samples for average value
+#define UV_SENSOR_PHOTON_INTEGRATION_TIME 4  // LED discharge time or photon intergration time (ms). Larger values more sensitive. <20
+
+//Camara shutter routine
+#define CAM_SHUTTER_PIN  7
+#define CAM_PIC_ON_TIME   10
+#define CAM_COUNTDOWN   15
 
 // --------------------------------------------------------------------------
 // Buzzer config (buzzer.cpp)
@@ -241,7 +255,7 @@
 // This option disables the buzzer above BUZZER_ALTITUDE meters. This is a
 // float value, so make it really high (eg. 1000000.0 = 1 million meters)
 // if you want it to never stop buzzing.
-#define BUZZER_ALTITUDE         3000.0  // meters (divide by 0.3048 for ft.)
+#define BUZZER_ALTITUDE         5000    //2510.0*0.3048  // meters (divide by 0.3048 for ft.)
 
 // The buzzer is driven by timer 1, so the options here are pin 9 or 10
 #define BUZZER_PIN              9
@@ -270,7 +284,7 @@
 #define DEBUG_AX25   // AX.25 frame dump
 //
 #define DEBUG_MODEM  // Modem ISR overrun and profiling
-#define DEBUG_LOGIC  // logic flow control
+//#define DEBUG_LOGIC  // logic flow control
 #define DEBUG_RESET  // AVR reset
 
 

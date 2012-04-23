@@ -25,6 +25,9 @@ int sensors_int_lm60();
 int sensors_int_bat();
 int sensors_ext_bat();
 int sensors_uva();
+void UVsensor_setup();
+void UVsensor_read_n(int n);
+void UVsensor_read();
 int sensors_acelerometer();
 
 

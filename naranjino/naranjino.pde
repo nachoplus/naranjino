@@ -35,16 +35,14 @@
 #include "modem.h"
 #include "radio.h"
 #include "radio_hx1.h"
-#include "radio_mx146.h"
 #include "sensors.h"
 #include "logic.h"
 
 // Arduino/AVR libs
-#include <Wire.h>
 #include <WProgram.h>
 #include <avr/power.h>
 #include <avr/sleep.h>
-#include <EEPROM.h>
+
 
 //GPS connected to serial soft. Only alternative if serial signal is inverted
 #ifdef GPS_PORT_SOFTSERIAL_RX_PORT
@@ -116,7 +114,7 @@ int get_gps_fix(int not_timeout=0) {
   
 // SWITCH ON GPS
 #ifdef GPS_ON_PIN
-  digitalWrite(GPS_ON_PIN,HIGH);
+  digitalWrite(GPS_ON_PIN,LOW);
 #endif 
   
 // SWITCH ON SERIAL PORT
@@ -142,7 +140,7 @@ while (!gps_decode(c)) {
          timeout_flag=1;
          n_timeouts++;
 #ifdef DEBUG_GPS
-          Serial.print("GPS TIMEOUT!!");
+          Serial.print("TIMEOUT!");
           Serial.println(n_timeouts);
 #endif  
         break;
@@ -160,7 +158,7 @@ while (!gps_decode(c)) {
 //SWITCH OFF GPS. DO NOT DO IT IF THERE IS NOT FIX.
 #ifdef GPS_ON_PIN  
     if (!timeout_flag) {
-          digitalWrite(GPS_ON_PIN,LOW);
+          digitalWrite(GPS_ON_PIN,HIGH);
           n_timeouts=0;
     }  
 #endif
@@ -191,23 +189,38 @@ void setup()
   gps_setup();
 
 
-#ifdef GPS_ON_PIN
-  pinMode(GPS_ON_PIN, OUTPUT);
-#endif
+
 //Buzzer test. Reset sound
           buzzer_on();
-          buzzer_power(1000);
+          buzzer_power(500);
           buzzer_time(0.02,.2);
           delay(2000);
           buzzer_off();
-get_gps_fix(1); //try to get first fix from gps. Wait until that.
+
 #ifdef SEND_TELEMETRY
-  aprs_send_telemetry_definition();
+     aprs_send_telemetry_definition();
 #endif
 
-  // Schedule the next transmission within APRS_DELAY ms
+get_gps_fix(1); //try to get first fix from gps. Wait until that.
+                //BEWARE TO SET 1 BEFORE LAUNCH DAY!!!!
+
+ 
+//Send first APRS msg
+          aprs_send("OK");
+#ifdef SEND_TELEMETRY
+          delay(5000);
+          aprs_send_telemetry("OK");
+#endif  
+
+
+// Schedule the next transmission within APRS_DELAY ms
   next_tx_millis = millis() + APRS_DELAY;
 
+//Start CAMS circuit  
+delay(500);
+//Serial.println("CAMs Countdown");
+shutter_countdown();  
+//Serial.println("CAMs started");
 }
 
 void loop()
@@ -215,14 +228,14 @@ void loop()
   unsigned int timeouts;
   char temp[]="BAD:     ";   
   if (millis() >= next_tx_millis) {  
-     write_eeprom((byte) sensors_int_bat());
+    //write_eeprom((byte) sensors_int_bat());
     // Show modem ISR stats from the previous transmission
 #ifdef DEBUG_MODEM
     modem_debug();
 #endif
     buzzer_off();  //Switch off the buzzer to avoid interferences with serialsoft and minimize simultaneos power demand.
     if((timeouts=get_gps_fix())==0) {
-          buzzer_power(500);
+          buzzer_power(600);
           buzzer_time(0.05,1.);
           aprs_send("OK");
 #ifdef SEND_TELEMETRY
@@ -231,7 +244,7 @@ void loop()
 #endif               
     } else {
           snprintf(&temp[5], 4, "%03u", (int) timeouts);
-          buzzer_power(500);
+          buzzer_power(400);
           buzzer_time(0.01,0.1);
           aprs_send(temp); 
 #ifdef SEND_TELEMETRY
@@ -241,8 +254,13 @@ void loop()
                        
     }  
       if (gps_altitude > BUZZER_ALTITUDE) {
-          buzzer_off();   // In space, no one can hear you buzz
-      } else {
+        //In space reduce the buzzer lasting to 5s every APRS message
+              buzzer_power(600);
+              buzzer_time(0.9,0.1);
+              buzzer_on();
+              delay(5000);                         //5 seconds
+              buzzer_off();
+       } else {
           buzzer_on();
       }
       // Schedule the next transmission
@@ -256,16 +274,4 @@ void loop()
 }
 
 
-void write_eeprom(byte val) {
-  static int addr=0;
-  EEPROM.write(addr, val);
-  
-  // advance to the next address.  there are 512 bytes in 
-  // the EEPROM, so go back to 0 when we hit 512.
-  addr = addr + 1;
-  if (addr == 512)
-    addr = 0;
-  
-  delay(100);
-  
-}
+

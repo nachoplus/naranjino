@@ -19,7 +19,7 @@
 #ifndef __MODEM_H__
 #define __MODEM_H__
 
-#define MODEM_MAX_PACKET 512
+#define MODEM_MAX_PACKET 516
 
 extern unsigned char modem_packet[MODEM_MAX_PACKET];  // Upper layer data
 extern unsigned int modem_packet_size;                // in bits

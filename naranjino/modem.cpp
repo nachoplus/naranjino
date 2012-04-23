@@ -31,7 +31,6 @@
 
 #include "config.h"
 #include "modem.h"
-#include "radio_mx146.h"
 #include "radio_hx1.h"
 #include <WProgram.h>
 #include <stdint.h>

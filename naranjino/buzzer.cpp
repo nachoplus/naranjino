@@ -52,8 +52,8 @@ void buzzer_time(float on,float off)
 void buzzer_power(int power) 
 {
   if (power>=990) power=990;
-  if (power<=0)   power=0;
-  
+  if (power<=10)   power=10;
+  power=1000-power;  //PNP Transistor. Invert
   // Set duty cycle = 50%
   OCR1 = (PWM_PERIOD *power)/ 1000;
 
@@ -85,12 +85,14 @@ void buzzer_on()
 {
   // Start the timer, no prescaler (CS1=1)
   TCCR1B |= _BV(CS10);
+  digitalWrite(BUZZER_PIN,HIGH);     //PNP Transistor. Invert
 }
 
 void buzzer_off()
 {
   // Stop the timer (CS1=0)
   TCCR1B &= ~(_BV(CS10) | _BV(CS11) | _BV(CS12));
+  digitalWrite(BUZZER_PIN,HIGH);     //PNP Transistor. Invert
 }
 
 // Interrupt Service Routine for TIMER1. This is used to switch between the
@@ -103,11 +105,11 @@ ISR (TIMER1_OVF_vect)
     if (buzzing) {
 #if BUZZER_PIN == 9
       // Non-inverting pin 9 (COM1A=2), p.135
-      TCCR1A |= _BV(COM1A1);
+      TCCR1A |= _BV(COM1A1);     
 #endif
 #if BUZZER_PIN == 10
       // Non-inverting pin 10 (COM1B=2), p.135
-      TCCR1A |= _BV(COM1B1)
+      TCCR1A |= _BV(COM1B1);
 #endif
       alarm = ON_CYCLES;
     } else {

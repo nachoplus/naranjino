@@ -182,8 +182,8 @@ ax25_flush_frame()
   Serial.print("MODEM BYTES:");  
   Serial.println( modem_packet_size/8);
   Serial.flush();
-  Serial.print("RAM:");
-  Serial.println(get_free_memory());
+  //Serial.print("RAM:");
+  //Serial.println(get_free_memory());
   Serial.flush(); 
 #endif
   // Key the transmitter and send the frame

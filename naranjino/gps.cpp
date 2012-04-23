@@ -228,7 +228,10 @@ void parse_dop(const char *token)
 // Exported functions
 //
 void gps_setup() {
-
+#ifdef GPS_ON_PIN
+  pinMode(GPS_ON_PIN, OUTPUT);
+  digitalWrite(GPS_ON_PIN,HIGH);
+#endif  
 }
 
 bool gps_decode(char c)

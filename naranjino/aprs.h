@@ -24,4 +24,5 @@
 void aprs_send(char* msg);
 void aprs_send_telemetry(char* msg); //Alternate message format. Use telemetry 
 void aprs_send_telemetry_definition();
+void aprs_send_telemetry_definition_msg(int msg_n);
 #endif

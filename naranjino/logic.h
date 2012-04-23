@@ -25,4 +25,8 @@ int get_free_memory();
 
 //void do_logic();
 
+//Camara shutter routine
+void shutter_countdown();
+
+
 #endif

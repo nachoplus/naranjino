@@ -26,6 +26,13 @@
 #include "sensors.h"
 #include <WProgram.h>
 
+/* UV sensor definitions */
+#define UVnumSensors 1    // Number of LED sensors
+byte UVanodePin[] =  { UV_ANODE };   // UV,GR,IR Leds
+byte UVcathodePin[] = { UV_CATHODE }; // the analogue input pins 0 to 5 when used digitally
+int UVresults[3];
+
+
 /*
  * sensors_aref: measure an external voltage hooked up to the AREF pin,
  * optionally (and recommendably) through a pull-up resistor. This is
@@ -35,7 +42,7 @@
 
 void sensors_setup()
 {
-
+  UVsensor_setup();
 }
 
 #ifdef INTERNAL_LM60_VOUT_PIN 
@@ -96,8 +103,10 @@ int sensors_acelerometer()
 
 int sensors_uva()
 {
-  // TO DO
-  return 0;
+  int v;
+  UVsensor_read_n(UV_SENSOR_N_SAMPLES); 
+  v=999-UVresults[0]*999./1024.;
+  return v;
 }
 
 
@@ -131,4 +140,77 @@ int sensors_graviton()
   return 0;
 }
 
+/* UV LED Sensors subroutines
+Nacho Mas 2012
+Base on the work of - Mike Cook
+*/
+
+
+void UVsensor_setup() {
+//  _SFR_IO8(0x35) |= 0x10;   // global disable pull up resistors
+ 
+  for(int i=0; i<UVnumSensors; i++){
+  digitalWrite(UVanodePin[i],LOW); // ensure pins go low immediatly after initilising them to outputs
+  pinMode(UVanodePin[i],OUTPUT);   // declare the anode pins as outputs
+  pinMode(UVcathodePin[i],INPUT); // declare the cathode pins as inputs
+  }
+}
+
+//Mean value. Take n samples
+void UVsensor_read_n(int n){
+    long int dummy[UVnumSensors]={0};
+    for(int j=0; j<n; j++){
+        UVsensor_read();
+        for(int i=0; i<UVnumSensors; i++){
+            dummy[i]+=UVresults[i];
+        }  
+    }    
+    for(int i=0; i<UVnumSensors; i++){
+        UVresults[i] = dummy[i]/n;
+    }  
+    
+}
+
+//read sensosrs
+void UVsensor_read() {
+ // Discharge: turn all LEDs on
+  for(int i=0; i<UVnumSensors; i++){
+    digitalWrite(UVanodePin[i],HIGH);
+    pinMode(UVcathodePin[i],OUTPUT);    // Enable cathode pins as outputs
+    digitalWrite(UVcathodePin[i],LOW);  // Turn ON LED
+  } 
+   // charge up LEDs cathode = HIGH, anode = LOW
+  for(int i=0; i<UVnumSensors; i++){
+    digitalWrite(UVanodePin[i],LOW); 
+    digitalWrite(UVcathodePin[i],HIGH);  
+  }
+  
+  delay(1);
+    // Put cathode pins into measuring state (analogue input)
+  for(int i=0; i<UVnumSensors; i++){
+    pinMode(UVcathodePin[i],INPUT);
+    digitalWrite(UVcathodePin[i],LOW);
+  }
+  // Take a reading of the voltage level on the inputs to get a referance level before discharge
+   /*for(int i=0; i<UVnumSensors; i++){
+     analogRead(UVcathodePin[i]-14);//Discard
+     UVresults[i] = analogRead(UVcathodePin[i]-14);  // Store the referance level
+   }*/
+  //**********************************************************
+  delay(UV_SENSOR_PHOTON_INTEGRATION_TIME);  // LED discharge time or photon intergration time
+              // The larger this is, the more sensitave is the system
+  //**********************************************************
+
+ // Read the sensors after discharge to measure the incedent light
+    // for(int i=UVnumSensors-1; i>-1; i--){  // reverse order reduces start to finish cross talk
+     for(int i=0; i<UVnumSensors; i++){  // reverse order reduces start to finish cross talk
+     analogRead(UVcathodePin[i]-14);; //Discard
+     //UVresults[i] -= analogRead(UVcathodePin[i]-14);     // subtract current reading from the referance to give the drop
+     UVresults[i] = analogRead(UVcathodePin[i]-14);     // subtract current reading from the referance to give the drop
+     pinMode(UVcathodePin[i],OUTPUT);   // by discharging the LED immediatly the charge on the A/D input is removed and
+     digitalWrite(UVcathodePin[i],LOW); // the cross talk between sensors is reduce
+     
+  }
+
+}
 
